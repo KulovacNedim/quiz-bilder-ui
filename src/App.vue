@@ -8,6 +8,8 @@
 
 
 <script>
+import "tailwindcss/tailwind.css";
+
 export default {
   name: "App",
   components: {},
@@ -23,6 +25,7 @@ export default {
 
 html {
   font-family: "Roboto", sans-serif;
+  background-color: #f7f8f9;
 }
 
 body {
