@@ -30,6 +30,7 @@ html {
 
 body {
   margin: 0;
+  padding: 8px;
 }
 
 .route-enter-from {
