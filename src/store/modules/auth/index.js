@@ -6,7 +6,10 @@ export default {
   namespaced: true,
   state() {
     return {
-      userId: 'c3',
+      token: null,
+      userId: null,
+      userEmail: null,
+      userName: null,
     };
   },
   mutations,

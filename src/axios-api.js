@@ -9,7 +9,7 @@ const serverAPI = axios.create({
     Authorization: localStorage.getItem('access_token')
       ? 'Bearer ' + localStorage.getItem('access-token')
       : null,
-    'Content-Type': 'aplication/json',
+    'Content-Type': 'application/json',
     accept: 'application/json',
   },
 });
@@ -84,4 +84,4 @@ serverAPI.interceptors.response.use(
   }
 );
 
-export { serverAPI };
+export default serverAPI;
