@@ -84,6 +84,7 @@
             }}</base-button>
           </div>
         </form>
+        <button v-if="!isLoggedIn">NEDIM</button>
       </div>
       <transition name="login">
         <div
@@ -126,6 +127,9 @@ export default {
     };
   },
   computed: {
+    isLoggedIn() {
+      return this.$store.getters["auth/isAuthenticated"];
+    },
     submitButtonCaption() {
       if (this.mode === "login") {
         return "SIGN IN";
@@ -151,9 +155,10 @@ export default {
     async submitFom() {
       this.formIsValid = true;
       if (
+        this.name === "" ||
         this.email === "" ||
         !this.email.includes("@") ||
-        this.password.length < this.passwordLength
+        this.password.length < 8
       ) {
         this.formIsValid = false;
         return;
@@ -162,7 +167,10 @@ export default {
 
       try {
         if (this.mode === "login") {
-          //
+          await this.$store.dispatch("auth/login", {
+            email: this.email,
+            password: this.password,
+          });
         } else if (this.mode === "signup") {
           await this.$store.dispatch("auth/signup", {
             email: this.email,
@@ -171,6 +179,7 @@ export default {
           });
         }
       } catch (error) {
+        console.log(error);
         this.error =
           error.response.data.errors[0] ||
           "Fail to authenticate. Please try later or contact administrator.";

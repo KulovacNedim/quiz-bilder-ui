@@ -1,18 +1,29 @@
 import axios from 'axios';
 
-const baseURL = 'http://127.0.0.1:8000';
+const baseURL = 'http://127.0.0.1:8000/api';
 
 const serverAPI = axios.create({
   baseURL: baseURL,
   timeout: 5000,
   headers: {
-    Authorization: localStorage.getItem('access_token')
+    Authorization: localStorage.getItem('access-token')
       ? 'Bearer ' + localStorage.getItem('access-token')
       : null,
     'Content-Type': 'application/json',
     accept: 'application/json',
   },
 });
+
+serverAPI.interceptors.request.use(
+  (config) => {
+    const accessToken = localStorage.getItem('access-token');
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 serverAPI.interceptors.response.use(
   (response) => {
@@ -43,7 +54,7 @@ serverAPI.interceptors.response.use(
       error.response.status === 401 &&
       error.response.statusText === 'Unauthorized'
     ) {
-      const refreshToken = localStorage.getItem('refresh_token');
+      const refreshToken = localStorage.getItem('refresh-token');
 
       if (refreshToken) {
         const tokenParts = JSON.parse(atob(refreshToken.split('.')[1]));
@@ -56,8 +67,8 @@ serverAPI.interceptors.response.use(
           return serverAPI
             .post('/token/refresh/', { refresh: refreshToken })
             .then((response) => {
-              localStorage.setItem('access_token', response.data.access);
-              localStorage.setItem('refresh_token', response.data.refresh);
+              localStorage.setItem('access-token', response.data.access);
+              localStorage.setItem('refresh-token', response.data.refresh);
 
               serverAPI.defaults.headers['Authorization'] =
                 'JWT ' + response.data.access;
