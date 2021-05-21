@@ -1,18 +1,26 @@
 <template>
-  <router-view v-slot="slotProps">
+  <TheHeader />
+  <router-view></router-view>
+  <!-- <router-view v-slot="slotProps">
     <transition name="route" mode="out-in">
       <component :is="slotProps.Component"></component>
     </transition>
-  </router-view>
+  </router-view> -->
 </template>
 
 
 <script>
 import "tailwindcss/tailwind.css";
+import TheHeader from "./components/ui/TheHeader";
 
 export default {
   name: "App",
-  components: {},
+  components: {
+    TheHeader,
+  },
+  created() {
+    this.$store.dispatch("auth/tryLogin");
+  },
 };
 </script>
 
