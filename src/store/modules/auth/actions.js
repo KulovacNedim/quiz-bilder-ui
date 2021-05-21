@@ -2,15 +2,49 @@ import serverAPI from '../../../axios-api';
 
 export default {
   async login(context, payload) {
-    const response = await serverAPI.post('/token/', {
+    return context.dispatch('auth', {
+      ...payload,
+      mode: 'login',
+    });
+  },
+  async signup(context, payload) {
+    return context.dispatch('auth', {
+      ...payload,
+      mode: 'signup',
+    });
+  },
+  async auth(context, payload) {
+    const mode = payload.mode;
+    let url = '/token/';
+    let fields = {
       email: payload.email,
       password: payload.password,
-    });
+    };
 
-    if (response.status !== 200) {
-      const error = new Error(response.message || 'Failed to authenticate');
-      throw error;
+    if (mode === 'signup') {
+      url = '/user/create/';
+      fields = {
+        email: payload.email,
+        user_name: payload.username,
+        password: payload.password,
+      };
     }
+    const response = await serverAPI.post(url, fields);
+    if (mode === 'signup') {
+      return context.dispatch('auth', {
+        ...payload,
+        mode: 'login',
+      });
+    }
+
+    const user = {
+      username: payload.username,
+      userEmail: payload.email,
+      accessToken: response.data.access,
+      refreshToken: response.data.refresh,
+    };
+
+    localStorage.setItem('user', JSON.stringify(user));
 
     context.commit('setUser', {
       username: payload.username,
@@ -18,26 +52,19 @@ export default {
       accessToken: response.data.access,
       refreshToken: response.data.refresh,
     });
-    localStorage.setItem('access-token', response.data.access);
-    localStorage.setItem('refresh-token', response.data.refresh);
   },
-  async signup({ dispatch }, payload) {
-    const response = await serverAPI.post('/user/create/', {
-      email: payload.email,
-      user_name: payload.username,
-      password: payload.password,
-    });
+  tryLogin(context) {
+    const user = JSON.parse(localStorage.getItem('user'));
 
-    if (response.status !== 201) {
-      const error = new Error(response.message || 'Failed to authenticate');
-      throw error;
+    if (user) {
+      console.log(user);
+      context.commit('setUser', {
+        username: user.username,
+        userEmail: user.email,
+        accessToken: user.accessToken,
+        refreshToken: user.refreshToken,
+      });
     }
-
-    await dispatch('login', {
-      email: payload.email,
-      password: payload.password,
-      username: payload.username,
-    });
   },
   logout(context) {
     context.commit('setUser', {
@@ -46,7 +73,6 @@ export default {
       accessToken: null,
       refreshToken: null,
     });
-    localStorage.removeItem('access-token');
-    localStorage.removeItem('refresh-token');
+    localStorage.removeItem('user');
   },
 };

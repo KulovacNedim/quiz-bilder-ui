@@ -84,7 +84,6 @@
             }}</base-button>
           </div>
         </form>
-        <button v-if="!isLoggedIn">NEDIM</button>
       </div>
       <transition name="login">
         <div
@@ -155,7 +154,7 @@ export default {
     async submitFom() {
       this.formIsValid = true;
       if (
-        this.name === "" ||
+        // this.name === "" ||
         this.email === "" ||
         !this.email.includes("@") ||
         this.password.length < 8
@@ -178,10 +177,11 @@ export default {
             password: this.password,
           });
         }
+        this.$router.replace("/");
       } catch (error) {
         console.log(error);
         this.error =
-          error.response.data.errors[0] ||
+          // error.response.data.errors[0] ||
           "Fail to authenticate. Please try later or contact administrator.";
       }
 
