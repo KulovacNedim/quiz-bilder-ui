@@ -37,9 +37,17 @@ export default {
       });
     }
 
+    localStorage.setItem('access-token', response.data.access);
+    localStorage.setItem('refresh-token', response.data.refresh);
+
+    const { data } = await serverAPI.get('/user/');
+
     const user = {
-      username: payload.username,
-      userEmail: payload.email,
+      id: data.id,
+      username: data.user_name,
+      firstName: data.first_name,
+      lastName: data.last_name,
+      userEmail: data.email,
       accessToken: response.data.access,
       refreshToken: response.data.refresh,
     };
@@ -47,32 +55,49 @@ export default {
     localStorage.setItem('user', JSON.stringify(user));
 
     context.commit('setUser', {
-      username: payload.username,
-      userEmail: payload.email,
+      id: data.id,
+      username: data.user_name,
+      firstName: data.first_name,
+      lastName: data.last_name,
+      userEmail: data.email,
       accessToken: response.data.access,
       refreshToken: response.data.refresh,
     });
   },
-  tryLogin(context) {
-    const user = JSON.parse(localStorage.getItem('user'));
+  async tryLogin(context) {
+    const accessToken = localStorage.getItem('access-token');
+    const refreshToken = localStorage.getItem('refresh-token');
+    if (!accessToken) {
+      return;
+    }
 
-    if (user) {
-      console.log(user);
+    try {
+      const { data } = await serverAPI.get('/user/');
       context.commit('setUser', {
-        username: user.username,
-        userEmail: user.email,
-        accessToken: user.accessToken,
-        refreshToken: user.refreshToken,
+        id: data.id,
+        username: data.user_name,
+        firstName: data.first_name,
+        lastName: data.last_name,
+        userEmail: data.email,
+        accessToken: accessToken,
+        refreshToken: refreshToken,
       });
+    } catch (error) {
+      return context.dispatch('logout');
     }
   },
   logout(context) {
     context.commit('setUser', {
+      id: null,
       userName: null,
+      firstName: null,
+      lastName: null,
       userEmail: null,
       accessToken: null,
       refreshToken: null,
     });
     localStorage.removeItem('user');
+    localStorage.removeItem('access-token');
+    localStorage.removeItem('refresh-token');
   },
 };
