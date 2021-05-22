@@ -1,6 +1,6 @@
 export default {
   userId(state) {
-    return state.userId;
+    return state.id;
   },
   isAuthenticated(state) {
     return !!state.accessToken;
